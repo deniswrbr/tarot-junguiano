@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarot & Arquétipos Junguianos - Mapa de Autoconhecimento</title>
+    <meta name="description" content="Um mapa simbólico de autoconhecimento inspirado na psicologia analítica de Carl Jung e na estrutura clássica do Tarot Waite.">
+    
+    <!-- React & Babel -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #060913; /* Deep dark blue */
+            --gold-primary: #d4af37;
+            --gold-secondary: #aa8529;
+            --gold-glow: rgba(212, 175, 55, 0.3);
+            --text-main: #f0e6d2;
+            --text-muted: #bdae93;
+            --card-bg: rgba(10, 15, 25, 0.85);
+            --card-border: #4a3e20;
+            --font-title: 'Cinzel', serif;
+            --font-body: 'Cormorant Garamond', serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at center, rgba(6, 9, 19, 0.4) 0%, rgba(6, 9, 19, 0.9) 100%),
+                url('./assets/tarot_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: var(--font-title);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 0;
+            color: var(--gold-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: clamp(1rem, 3vw, 2rem);
+        }
+
+        /* HEADER */
+        header {
+            text-align: center;
+            padding: clamp(2rem, 5vw, 4rem) 0 clamp(1.5rem, 4vw, 3rem);
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        header::after {
+            content: "✧ ✦ ✧";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-color);
+            padding: 0 1rem;
+            color: var(--gold-primary);
+            font-size: 1.2rem;
+        }
+
+        header h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            text-shadow: 0 0 20px var(--gold-glow);
+            margin-bottom: 1rem;
+        }
+
+        header p {
+            font-size: clamp(1.1rem, 3vw, 1.5rem);
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* NAVIGATION */
+        nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        button.nav-btn {
+            background: transparent;
+            border: 1px solid var(--gold-primary);
+            color: var(--gold-primary);
+            font-family: var(--font-title);
+            font-size: 1.1rem;
+            padding: 0.8rem 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button.nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--gold-primary);
+            z-index: -1;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.3s ease;
+        }
+
+        button.nav-btn:hover::before,
+        button.nav-btn.active::before {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        button.nav-btn:hover,
+        button.nav-btn.active {
+            color: var(--bg-color);
+            box-shadow: 0 0 15px var(--gold-glow);
+        }
+
+        /* SPREADS SECTION */
+        .spread-selector {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 0 1rem;
+        }
+
+        .spread-selector select {
+            background: var(--card-bg);
+            color: var(--gold-primary);
+            border: 1px solid var(--gold-primary);
+            font-family: var(--font-title);
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            outline: none;
+            max-width: 100%;
+        }
+
+        .spread-board {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: clamp(1.5rem, 4vw, 3rem);
+            margin-bottom: 4rem;
+            min-height: auto;
+        }
+
+        .spread-position {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+            max-width: 250px;
+            flex: 1 1 200px;
+        }
+
+        .position-label {
+            font-family: var(--font-title);
+            color: var(--gold-primary);
+            text-align: center;
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 0.5rem;
+            width: 100%;
+        }
+
+        .draw-btn {
+            background: var(--gold-primary);
+            color: var(--bg-color);
+            border: none;
+            font-family: var(--font-title);
+            font-size: 1.2rem;
+            padding: 1rem 3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 0 auto 3rem;
+            display: block;
+            border-radius: 2px;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+        }
+
+        .draw-btn:hover {
+            background: var(--gold-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+
+        .draw-btn:disabled {
+            background: var(--card-border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* TAROT CARD */
+        .tarot-card {
+            width: 100%;
+            max-width: 220px;
+            aspect-ratio: 22 / 38;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+
+        .tarot-card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            border: 2px solid var(--gold-secondary);
+        }
+
+        .card-back {
+            background-image: url('./assets/card_back.png');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .card-front {
+            transform: rotateY(180deg);
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* CARD DETAILS INFOBOX */
+        .card-details-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: clamp(1.5rem, 4vw, 3rem);
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            max-width: 800px;
+            margin: auto;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: fadeIn 0.5s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: clamp(1.5rem, 4vw, 2.5rem);
+            align-items: start;
+        }
+
+        .details-img-container {
+            border: 2px solid var(--gold-primary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .details-img-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .details-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 1rem;
+        }
+
+        .details-content h3 {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .attribute-row {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .attribute-label {
+            font-family: var(--font-title);
+            color: var(--gold-primary);
+            width: 120px;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+        }
+
+        .attribute-value {
+            font-size: 1.2rem;
+            line-height: 1.4;
+        }
+
+        /* LIBRARY GRID */
+        .library-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: clamp(1rem, 3vw, 2rem);
+            padding: 2rem 0;
+        }
+
+        .library-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .library-item:hover {
+            transform: translateY(-10px);
+        }
+
+        .library-item .tarot-card {
+            width: 100%;
+            max-width: 180px;
+        }
+
+        .library-item-title {
+            font-family: var(--font-title);
+            color: var(--gold-primary);
+            text-align: center;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--gold-primary);
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .details-content h2 {
+                font-size: 1.8rem;
+            }
+            .attribute-row {
+                flex-direction: column;
+            }
+            .attribute-label {
+                margin-bottom: 0.2rem;
+            }
+            nav {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            button.nav-btn {
+                width: 100%;
+            }
+            .library-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- DATA: ARCANOS MAIORES ---
+        const majorArcana = [
+            { id: 0, name: "O Louco", number: "0", archetype: "O Inocente / O Buscador", shadow: "irresponsabilidade", light: "liberdade", lesson: "confiar na jornada", img: "https://upload.wikimedia.org/wikipedia/commons/9/90/RWS_Tarot_00_Fool.jpg" },
+            { id: 1, name: "O Mago", number: "I", archetype: "O Criador", shadow: "manipulação", light: "manifestação consciente", lesson: "usar o poder com intenção", img: "https://upload.wikimedia.org/wikipedia/commons/d/de/RWS_Tarot_01_Magician.jpg" },
+            { id: 2, name: "A Sacerdotisa", number: "II", archetype: "A Intuitiva", shadow: "repressão emocional", light: "sabedoria interior", lesson: "escutar o inconsciente", img: "https://upload.wikimedia.org/wikipedia/commons/8/88/RWS_Tarot_02_High_Priestess.jpg" },
+            { id: 3, name: "A Imperatriz", number: "III", archetype: "A Grande Mãe", shadow: "excesso de controle afetivo", light: "abundância", lesson: "nutrir sem aprisionar", img: "https://upload.wikimedia.org/wikipedia/commons/d/d2/RWS_Tarot_03_Empress.jpg" },
+            { id: 4, name: "O Imperador", number: "IV", archetype: "O Pai / Estrutura", shadow: "rigidez", light: "liderança consciente", lesson: "criar estabilidade", img: "https://upload.wikimedia.org/wikipedia/commons/c/c3/RWS_Tarot_04_Emperor.jpg" },
+            { id: 5, name: "O Hierofante", number: "V", archetype: "O Mentor", shadow: "dogmatismo", light: "tradição e sabedoria", lesson: "compreender crenças", img: "https://upload.wikimedia.org/wikipedia/commons/8/8d/RWS_Tarot_05_Hierophant.jpg" },
+            { id: 6, name: "Os Enamorados", number: "VI", archetype: "A Escolha", shadow: "dependência emocional", light: "integração", lesson: "alinhar coração e consciência", img: "https://upload.wikimedia.org/wikipedia/commons/3/3a/RWS_Tarot_06_Lovers.jpg" },
+            { id: 7, name: "O Carro", number: "VII", archetype: "O Guerreiro", shadow: "impulsividade", light: "direção", lesson: "dominar impulsos", img: "https://upload.wikimedia.org/wikipedia/commons/9/9b/RWS_Tarot_07_Chariot.jpg" },
+            { id: 8, name: "A Justiça", number: "VIII", archetype: "A Verdade", shadow: "frieza", light: "equilíbrio", lesson: "responsabilidade pelos atos", img: "https://upload.wikimedia.org/wikipedia/commons/e/e6/RWS_Tarot_11_Justice.jpg" },
+            { id: 9, name: "O Eremita", number: "IX", archetype: "O Sábio", shadow: "isolamento", light: "introspecção", lesson: "encontrar a própria verdade", img: "https://upload.wikimedia.org/wikipedia/commons/4/4d/RWS_Tarot_09_Hermit.jpg" },
+            { id: 10, name: "A Roda da Fortuna", number: "X", archetype: "O Destino", shadow: "passividade", light: "fluxo da vida", lesson: "aceitar mudanças", img: "https://upload.wikimedia.org/wikipedia/commons/3/3c/RWS_Tarot_10_Wheel_of_Fortune.jpg" },
+            { id: 11, name: "A Força", number: "XI", archetype: "O Domador Interior", shadow: "repressão emocional", light: "autocontrole amoroso", lesson: "integrar instintos", img: "https://upload.wikimedia.org/wikipedia/commons/f/f5/RWS_Tarot_08_Strength.jpg" },
+            { id: 12, name: "O Enforcado", number: "XII", archetype: "O Sacrifício", shadow: "vitimização", light: "nova perspectiva", lesson: "render-se à transformação", img: "https://upload.wikimedia.org/wikipedia/commons/2/2b/RWS_Tarot_12_Hanged_Man.jpg" },
+            { id: 13, name: "A Morte", number: "XIII", archetype: "O Transformador", shadow: "apego", light: "renascimento", lesson: "permitir encerramentos", img: "https://upload.wikimedia.org/wikipedia/commons/d/d7/RWS_Tarot_13_Death.jpg" },
+            { id: 14, name: "A Temperança", number: "XIV", archetype: "O Alquimista", shadow: "dispersão", light: "harmonia", lesson: "integração psíquica", img: "https://upload.wikimedia.org/wikipedia/commons/f/f8/RWS_Tarot_14_Temperance.jpg" },
+            { id: 15, name: "O Diabo", number: "XV", archetype: "A Sombra", shadow: "compulsões", light: "consciência dos desejos", lesson: "libertar-se de correntes internas", img: "https://upload.wikimedia.org/wikipedia/commons/5/55/RWS_Tarot_15_Devil.jpg" },
+            { id: 16, name: "A Torre", number: "XVI", archetype: "A Ruptura", shadow: "resistência à mudança", light: "libertação", lesson: "destruir ilusões", img: "https://upload.wikimedia.org/wikipedia/commons/5/53/RWS_Tarot_16_Tower.jpg" },
+            { id: 17, name: "A Estrela", number: "XVII", archetype: "A Esperança", shadow: "ingenuidade", light: "fé interior", lesson: "reconectar-se com a alma", img: "https://upload.wikimedia.org/wikipedia/commons/d/db/RWS_Tarot_17_Star.jpg" },
+            { id: 18, name: "A Lua", number: "XVIII", archetype: "O Inconsciente", shadow: "medo e ilusão", light: "imaginação profunda", lesson: "atravessar sombras emocionais", img: "https://upload.wikimedia.org/wikipedia/commons/7/7f/RWS_Tarot_18_Moon.jpg" },
+            { id: 19, name: "O Sol", number: "XIX", archetype: "A Consciência", shadow: "ego inflado", light: "vitalidade", lesson: "viver autenticidade", img: "https://upload.wikimedia.org/wikipedia/commons/1/17/RWS_Tarot_19_Sun.jpg" },
+            { id: 20, name: "O Julgamento", number: "XX", archetype: "O Despertar", shadow: "culpa", light: "renascimento psíquico", lesson: "ouvir o chamado interior", img: "https://upload.wikimedia.org/wikipedia/commons/d/dd/RWS_Tarot_20_Judgement.jpg" },
+            { id: 21, name: "O Mundo", number: "XXI", archetype: "O Self Integrado", shadow: "medo do novo ciclo", light: "completude", lesson: "integração da jornada", img: "https://upload.wikimedia.org/wikipedia/commons/f/ff/RWS_Tarot_21_World.jpg" }
+        ];
+
+        // --- SPREADS ---
+        const spreads = {
+            sombra: {
+                name: "Tiragem da Sombra",
+                positions: ["1. O que reprimo?", "2. Como isso aparece?", "3. O que preciso integrar?"]
+            },
+            crianca: {
+                name: "Tiragem da Criança Interior",
+                positions: ["1. Ferida principal", "2. Necessidade emocional", "3. Caminho de cura"]
+            },
+            individuacao: {
+                name: "Tiragem de Individuação",
+                positions: ["1. Persona", "2. Sombra", "3. Medo inconsciente", "4. Potencial oculto", "5. Self"]
+            }
+        };
+
+        // --- COMPONENTS ---
+
+        const CardDetails = ({ card, onClose }) => {
+            if (!card) return null;
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <button className="close-btn" onClick={onClose}>&times;</button>
+                        <div className="card-details-panel">
+                            <div className="details-grid">
+                                <div className="details-img-container">
+                                    <img src={card.img} alt={card.name} />
+                                </div>
+                                <div className="details-content">
+                                    <h2>{card.number} — {card.name}</h2>
+                                    <h3>{card.archetype}</h3>
+                                    
+                                    <div className="attribute-row">
+                                        <div className="attribute-label">Sombra:</div>
+                                        <div className="attribute-value">{card.shadow}</div>
+                                    </div>
+                                    <div className="attribute-row">
+                                        <div className="attribute-label">Luz/Potencial:</div>
+                                        <div className="attribute-value">{card.light}</div>
+                                    </div>
+                                    <div className="attribute-row">
+                                        <div className="attribute-label">Lição:</div>
+                                        <div className="attribute-value">{card.lesson}</div>
+                                    </div>
+                                    <br/>
+                                    <div className="attribute-row" style={{fontStyle: 'italic', color: 'var(--text-muted)'}}>
+                                        <div className="attribute-label">Reflexão:</div>
+                                        <div className="attribute-value">"Onde esse arquétipo atua no meu inconsciente neste momento?"</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const TarotCard = ({ card, isFlipped, onClick }) => {
+            return (
+                <div className={`tarot-card ${isFlipped ? 'flipped' : ''}`} onClick={onClick}>
+                    <div className="card-inner">
+                        <div className="card-back"></div>
+                        <div className="card-front">
+                            {card && <img src={card.img} alt={card.name} className="card-image" />}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const SpreadReader = () => {
+            const [selectedSpread, setSelectedSpread] = useState('sombra');
+            const [drawnCards, setDrawnCards] = useState([]);
+            const [flippedState, setFlippedState] = useState([]);
+            const [selectedCard, setSelectedCard] = useState(null);
+
+            const spread = spreads[selectedSpread];
+
+            const drawCards = () => {
+                // Reset state
+                setDrawnCards([]);
+                setFlippedState([]);
+                
+                // Draw random unique cards from Major Arcana
+                let deck = [...majorArcana];
+                let drawn = [];
+                for (let i = 0; i < spread.positions.length; i++) {
+                    const randomIndex = Math.floor(Math.random() * deck.length);
+                    drawn.push(deck[randomIndex]);
+                    deck.splice(randomIndex, 1);
+                }
+                
+                setTimeout(() => {
+                    setDrawnCards(drawn);
+                    setFlippedState(new Array(drawn.length).fill(false));
+                }, 300);
+            };
+
+            const flipCard = (index) => {
+                if (!flippedState[index]) {
+                    const newFlipped = [...flippedState];
+                    newFlipped[index] = true;
+                    setFlippedState(newFlipped);
+                } else {
+                    setSelectedCard(drawnCards[index]);
+                }
+            };
+
+            return (
+                <div>
+                    <div className="spread-selector">
+                        <select 
+                            value={selectedSpread} 
+                            onChange={(e) => {
+                                setSelectedSpread(e.target.value);
+                                setDrawnCards([]);
+                            }}
+                        >
+                            <option value="sombra">Tiragem da Sombra (3 Cartas)</option>
+                            <option value="crianca">Criança Interior (3 Cartas)</option>
+                            <option value="individuacao">Roda da Individuação (5 Cartas)</option>
+                        </select>
+                    </div>
+
+                    <button className="draw-btn" onClick={drawCards}>
+                        {drawnCards.length > 0 ? 'Nova Tiragem' : 'Realizar Tiragem'}
+                    </button>
+
+                    {drawnCards.length > 0 && (
+                        <div className="spread-board">
+                            {drawnCards.map((card, index) => (
+                                <div key={index} className="spread-position">
+                                    <div className="position-label">{spread.positions[index]}</div>
+                                    <TarotCard 
+                                        card={card} 
+                                        isFlipped={flippedState[index]} 
+                                        onClick={() => flipCard(index)}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    
+                    {drawnCards.length > 0 && flippedState.some(s => s === false) && (
+                        <p style={{textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic'}}>
+                            Clique nas cartas para revelá-las.
+                        </p>
+                    )}
+
+                    {selectedCard && (
+                        <CardDetails card={selectedCard} onClose={() => setSelectedCard(null)} />
+                    )}
+                </div>
+            );
+        };
+
+        const Library = () => {
+            const [selectedCard, setSelectedCard] = useState(null);
+
+            return (
+                <div>
+                    <h2 style={{textAlign: 'center', marginBottom: '3rem', fontSize: '2.5rem'}}>Biblioteca de Arquétipos</h2>
+                    <p style={{textAlign: 'center', marginBottom: '3rem', color: 'var(--text-muted)', maxWidth: '800px', margin: '0 auto 3rem'}}>
+                        Os 22 Arcanos Maiores representam as etapas centrais da jornada de individuação. Cada carta é um portal para a compreensão de nossas sombras e potenciais ocultos.
+                    </p>
+                    
+                    <div className="library-grid">
+                        {majorArcana.map(card => (
+                            <div key={card.id} className="library-item">
+                                <TarotCard 
+                                    card={card} 
+                                    isFlipped={true} 
+                                    onClick={() => setSelectedCard(card)}
+                                />
+                                <div className="library-item-title">{card.number} - {card.name}</div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {selectedCard && (
+                        <CardDetails card={selectedCard} onClose={() => setSelectedCard(null)} />
+                    )}
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('reading');
+
+            return (
+                <div className="container">
+                    <header>
+                        <h1>Tarot & Arquétipos Junguianos</h1>
+                        <p>Mapa de Autoconhecimento da Psique e Individuação</p>
+                    </header>
+
+                    <nav>
+                        <button 
+                            className={`nav-btn ${activeTab === 'reading' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('reading')}
+                        >
+                            Tiragens Terapêuticas
+                        </button>
+                        <button 
+                            className={`nav-btn ${activeTab === 'library' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('library')}
+                        >
+                            Biblioteca dos Arcanos
+                        </button>
+                    </nav>
+
+                    <main>
+                        {activeTab === 'reading' ? <SpreadReader /> : <Library />}
+                    </main>
+
+                    <footer style={{textAlign: 'center', padding: '4rem 0 2rem', color: 'var(--text-muted)', fontStyle: 'italic', opacity: 0.7}}>
+                        "Tudo o que negamos em nós ganha força no inconsciente." — C.G. Jung
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
